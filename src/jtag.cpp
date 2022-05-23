@@ -21,6 +21,9 @@
 #include "ftdipp_mpsse.hpp"
 #include "ftdiJtagBitbang.hpp"
 #include "ftdiJtagMPSSE.hpp"
+#ifdef ENABLE_LIBGPIOD
+#include "libgpiodJtagBitbang.hpp"
+#endif
 #include "jlink.hpp"
 #ifdef ENABLE_CMSISDAP
 #include "cmsisDAP.hpp"
@@ -123,6 +126,13 @@ void Jtag::init_internal(cable_t &cable, const string &dev, const string &serial
 #ifdef ENABLE_XVC_CLIENT
 	case MODE_XVC_CLIENT:
 		_jtag = new XVC_client(ip_adr, clkHZ, _verbose);
+		break;
+#endif
+#ifdef ENABLE_LIBGPIOD
+	case MODE_LIBGPIOD_BITBANG:
+		if (pin_conf == NULL)
+			throw std::exception();
+		_jtag = new LibgpiodJtagBitbang(pin_conf, dev, clkHZ, _verbose);
 		break;
 #endif
 	default:
